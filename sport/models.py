@@ -35,12 +35,12 @@ class Plan(models.Model):
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
     day_of_week = models.CharField(max_length=10 , choices=(('saturday','saturday'),
-                                                                                ('sunday','sunday'),
-                                                                                ('monday','monday'),
-                                                                                ('tuesday','tuesday'),
-                                                                                ('wednesday','wednesday'),
-                                                                                ('thursday','thursday'),
-                                                                                ('friday','friday')))
+                                                                                                                ('sunday','sunday'),
+                                                                                                                ('monday','monday'),
+                                                                                                                ('tuesday','tuesday'),
+                                                                                                                ('wednesday','wednesday'),
+                                                                                                                ('thursday','thursday'),
+                                                                                                                ('friday','friday')))
 
     created_date = models.DateTimeField(auto_now_add=True)
     update_date = models.DateTimeField(auto_now=True)
