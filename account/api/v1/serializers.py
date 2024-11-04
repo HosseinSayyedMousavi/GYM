@@ -27,7 +27,6 @@ class RegistrationSerializer(serializers.ModelSerializer):
         return User.objects.create_user(**validated_data)
 
 
-
 class UserAPIViewSerializer(serializers.Serializer):
     email = serializers.EmailField(required=False)
     first_name = serializers.CharField(max_length=20,required=False)
@@ -36,6 +35,7 @@ class UserAPIViewSerializer(serializers.Serializer):
     user_type = serializers.CharField(max_length=10,required=False)
     created_date = serializers.DateTimeField(required = False)
     updated_date = serializers.DateTimeField(required = False)
+
 
 class UpdateUserAPIViewSerializer(serializers.Serializer):
     email = serializers.EmailField(required=False)
