@@ -26,3 +26,13 @@ class RegistrationSerializer(serializers.ModelSerializer):
         validated_data.pop('password1',None)
         return User.objects.create_user(**validated_data)
 
+
+
+class UserAPIViewSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=False)
+    first_name = serializers.CharField(max_length=20,required=False)
+    last_name = serializers.CharField(max_length=20,required=False)
+    phone_number = serializers.CharField(max_length=11,required=False)
+    created_date = serializers.DateTimeField(required = False)
+    updated_date = serializers.DateTimeField(required = False)
+

@@ -1,8 +1,8 @@
 
 from rest_framework.response import Response
 from copy import copy
-from rest_framework import status ,generics
-from .serializers import RegistrationSerializer
+from rest_framework import status , permissions ,generics
+from .serializers import RegistrationSerializer ,  UserAPIViewSerializer
 
 class RegistrationApiView(generics.GenericAPIView):
     serializer_class = RegistrationSerializer
@@ -15,3 +15,11 @@ class RegistrationApiView(generics.GenericAPIView):
         data.pop("password",None)
         return Response(data , status = status.HTTP_201_CREATED)
 
+class UserAPIView(generics.GenericAPIView):
+    serializer_class = UserAPIViewSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    def get(self,request):
+        user = request.user
+        serializer = self.serializer_class(user)
+        serializer.data['error'] = False
+        return Response(serializer.data)
