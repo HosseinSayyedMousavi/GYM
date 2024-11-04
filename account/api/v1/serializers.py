@@ -33,6 +33,7 @@ class UserAPIViewSerializer(serializers.Serializer):
     first_name = serializers.CharField(max_length=20,required=False)
     last_name = serializers.CharField(max_length=20,required=False)
     phone_number = serializers.CharField(max_length=11,required=False)
+    user_type = serializers.CharField(max_length=10,required=False)
     created_date = serializers.DateTimeField(required = False)
     updated_date = serializers.DateTimeField(required = False)
 
