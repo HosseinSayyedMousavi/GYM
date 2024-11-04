@@ -16,8 +16,9 @@ class UserManager(BaseUserManager):
         """
         if not phone_number:
             raise ValueError(_("the phone number must be set"))
-        if extra_fields.get("email"):
-            email = self.normalize_email(email)
+        email = extra_fields.get("email")
+        if email:
+            email = self.normalize_email(extra_fields.get("email"))
         user = self.model(phone_number=phone_number,**extra_fields)
         user.set_password(password)
         user.save()
