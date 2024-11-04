@@ -36,3 +36,7 @@ class UserAPIViewSerializer(serializers.Serializer):
     created_date = serializers.DateTimeField(required = False)
     updated_date = serializers.DateTimeField(required = False)
 
+class UpdateUserAPIViewSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=False)
+    first_name = serializers.CharField(max_length=20,required=False)
+    last_name = serializers.CharField(max_length=20,required=False)
