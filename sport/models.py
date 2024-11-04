@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
-
+from django.core.exceptions import ValidationError
 User = get_user_model()
 # Create your models here.
 
@@ -17,6 +17,17 @@ class Course(models.Model):
 
     created_date = models.DateTimeField(auto_now_add=True)
     update_date = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        # Ensure teacher has user_type 'teacher'
+        if self.teacher.user_type != 'teacher':
+            raise ValidationError({'teacher': 'Selected user must have user_type "teacher".'})
+        
+        # Ensure student has user_type 'student'
+        if self.student.user_type != 'student':
+            raise ValidationError({'student': 'Selected user must have user_type "student".'})
+
+        super().save(*args, **kwargs)
 
 class Diet(models.Model):
     course = models.ForeignKey(Course,on_delete=models.CASCADE)
