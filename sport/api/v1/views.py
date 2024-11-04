@@ -2,10 +2,11 @@ from rest_framework.response import Response
 from rest_framework import generics
 from rest_framework import status , permissions ,generics
 from rest_framework.pagination import PageNumberPagination
-from ...models import Course , Action
+from ...models import Course , Action , Diet
 from django.db.models import Q
-from .serializers import CourseSerializer , ActionSerializer
-
+from .serializers import CourseSerializer , ActionSerializer , DietSerializer
+from django.contrib.auth import get_user_model
+User = get_user_model()
 
 class ListPagination(PageNumberPagination):
     page_size = 10 
@@ -29,3 +30,13 @@ class ActionListAPIView(generics.ListAPIView):
     pagination_class = ListPagination
     queryset = Action.objects.all()
 
+
+class DietAPIView(generics.GenericAPIView):
+    serializer_class = DietSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self,request):
+        query = Q(course__teacher= request.user.id) | Q(course__student= request.user.id)
+        queryset = Diet.objects.filter(query)
+        serializer = self.serializer_class(queryset,many=True)
+        return Response(serializer.data)
