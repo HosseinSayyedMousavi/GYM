@@ -4,8 +4,9 @@ from rest_framework import status , permissions ,generics
 from rest_framework.pagination import PageNumberPagination
 from ...models import Course , Action , Diet
 from django.db.models import Q
-from .serializers import CourseSerializer , ActionSerializer , DietSerializer
+from .serializers import CourseSerializer , ActionSerializer , DietSerializer , CreateDietSerializer 
 from django.contrib.auth import get_user_model
+
 User = get_user_model()
 
 class ListPagination(PageNumberPagination):
@@ -32,11 +33,17 @@ class ActionListAPIView(generics.ListAPIView):
 
 
 class DietAPIView(generics.GenericAPIView):
-    serializer_class = DietSerializer
+    serializer_class = CreateDietSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self,request):
         query = Q(course__teacher= request.user.id) | Q(course__student= request.user.id)
         queryset = Diet.objects.filter(query)
-        serializer = self.serializer_class(queryset,many=True)
+        serializer = DietSerializer(queryset,many=True)
         return Response(serializer.data)
+
+    def post(self,request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({'message':'Diet created successfully!'})

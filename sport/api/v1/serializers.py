@@ -4,7 +4,7 @@ from account.api.v1.serializers import UserAPIViewSerializer
 
 class CourseSerializer(serializers.ModelSerializer):
     teacher = UserAPIViewSerializer()
-    user = UserAPIViewSerializer()
+    student = UserAPIViewSerializer()
     class Meta:
         model = Course
         fields = '__all__'
@@ -19,3 +19,17 @@ class DietSerializer(serializers.ModelSerializer):
     class Meta:
         model = Diet
         fields = '__all__'
+        
+
+class CreateDietSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Diet
+        exclude = ['created_date','update_date']
+        
+    def validate(self,attrs):
+        course = attrs.get('course')
+        if course.teacher != self.context['request'].user:
+            raise serializers.ValidationError({"detail" : "You are not the teacher of this course."})
+        
+        return super().validate(attrs)
+        

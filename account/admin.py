@@ -13,7 +13,7 @@ class CustomUserAdmin(UserAdmin):
     """
 
     model = User
-    list_display = ("phone_number","email", "is_superuser", "is_active")
+    list_display = ("phone_number","email", "is_superuser", "is_active","user_type")
     list_filter = ("is_superuser", "is_active")
     searching_fields = ("phone_number",)
     ordering = ("email",)
@@ -50,7 +50,7 @@ class CustomUserAdmin(UserAdmin):
         (
             "other fields",
             {
-                "fields": ("email","first_name","last_name"),
+                "fields": ("email","first_name","last_name","user_type"),
             },
         ),
     )
@@ -64,6 +64,7 @@ class CustomUserAdmin(UserAdmin):
                     "password1",
                     "password2",
                     "is_active",
+                    "user_type",
                     "is_superuser",
                 ),
             },
