@@ -25,5 +25,9 @@ urlpatterns = [
     path('sport/',include('sport.urls')),
 ]
 
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) \
-                        + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+if settings.DEBUG:
+    from drf_spectacular.views import SpectacularSwaggerView
+    from django.conf.urls.static import static
+    urlpatterns.append(path('api/swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger'),)
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) \
+                            + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
