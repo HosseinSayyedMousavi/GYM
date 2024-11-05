@@ -4,7 +4,7 @@ from rest_framework import status , permissions ,generics
 from rest_framework.pagination import PageNumberPagination
 from ...models import Course , Action , Diet
 from django.db.models import Q
-from .serializers import CourseSerializer , ActionSerializer , DietSerializer , CreateDietSerializer 
+from .serializers import CourseSerializer , ActionSerializer , DietSerializer , CreateDietSerializer , UpdateDietSerializer
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -47,3 +47,18 @@ class DietAPIView(generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response({'message':'Diet created successfully!'})
+    
+class UpdateDietAPIView(generics.GenericAPIView):
+    serializer_class = UpdateDietSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    lookup_field = 'id'
+    def get_queryset(self):
+        queryset = Diet.objects.filter(course__teacher= self.request.user)
+        return queryset
+    
+    def put(self,request,id):
+        diet = self.get_object()
+        serializer = self.get_serializer(instance=diet,data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({'message':'Diet updated successfully!'})
