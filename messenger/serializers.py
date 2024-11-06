@@ -3,6 +3,7 @@ from .models import Conversation , ConversationMessage
 from django.utils.translation import gettext as _
 from django.core.validators import MaxLengthValidator
 from django.core.paginator import Paginator
+import difflib
 
 class CreateConversationSerializer(serializers.ModelSerializer):
     message = serializers.CharField(required=True,validators=[MaxLengthValidator(1000)])
@@ -62,3 +63,18 @@ class ConversationDetailSerializer(serializers.ModelSerializer):
 class ConversationMessagePaginatorSerializer(serializers.Serializer):
     page = serializers.IntegerField(required=False)
     page_size = serializers.IntegerField(required=False)
+
+
+class AddMessageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ConversationMessage
+        fields = ("user","conversation","message")
+
+    def validate(self, attrs):
+        valid = super().validate(attrs)
+        conversation = attrs.get("conversation")
+
+        if attrs.get("user").id not in [conversation.receiver.id,conversation.sender.id]:
+            raise exceptions.ValidationError({"detail":"this conversation is not yours"})
+
+        return valid
