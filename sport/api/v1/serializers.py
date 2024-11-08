@@ -62,3 +62,14 @@ class CreatePlanSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError({"detail" : "You are not the teacher of this course."})
         
             return super().validate(attrs)
+
+class UpdatePlanSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Plan
+        fields = ['action','set_number','number_per_set','start_date','end_date','day_of_week']
+        
+    def validate(self,attrs):
+        if self.instance.course.teacher != self.context['request'].user:
+            raise serializers.ValidationError({"detail" : "You are not the teacher of course of this diet."})
+        
+        return super().validate(attrs)
