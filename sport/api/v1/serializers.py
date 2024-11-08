@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from ...models import Course , Action , Diet
+from ...models import Course , Action , Diet , Plan
 from account.api.v1.serializers import UserAPIViewSerializer
 
 class CourseSerializer(serializers.ModelSerializer):
@@ -44,3 +44,9 @@ class UpdateDietSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({"detail" : "You are not the teacher of course of this diet."})
         
         return super().validate(attrs)
+
+class PlanSerializer(serializers.ModelSerializer):
+    course = CourseSerializer()
+    class Meta:
+        model = Plan
+        fields = '__all__'
