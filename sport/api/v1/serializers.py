@@ -50,3 +50,15 @@ class PlanSerializer(serializers.ModelSerializer):
     class Meta:
         model = Plan
         fields = '__all__'
+
+class CreatePlanSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Plan  
+        exclude = ['created_date','update_date']
+
+        def validate(self,attrs):
+            course = attrs.get('course')
+            if course.teacher != self.context['request'].user:
+                raise serializers.ValidationError({"detail" : "You are not the teacher of this course."})
+        
+            return super().validate(attrs)
