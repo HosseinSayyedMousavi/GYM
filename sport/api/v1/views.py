@@ -2,9 +2,10 @@ from rest_framework.response import Response
 from rest_framework import generics
 from rest_framework import status , permissions ,generics
 from rest_framework.pagination import PageNumberPagination
-from ...models import Course , Action , Diet
+from ...models import Course , Action , Diet , Plan
 from django.db.models import Q
 from .serializers import CourseSerializer , ActionSerializer , DietSerializer , CreateDietSerializer , UpdateDietSerializer
+from .serializers import PlanSerializer , CreatePlanSerializer , UpdatePlanSerializer
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -62,3 +63,33 @@ class UpdateDietAPIView(generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response({'message':'Diet updated successfully!'})
+    
+class PlanAPIView(generics.GenericAPIView):
+    serializer_class = CreatePlanSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    def get(self,request,):
+        query= Q(course__teacher= request.user.id) | Q(course__student = request.user.id)
+        queryset = Plan.objects.filter(query)
+        serializer = PlanSerializer(queryset, many=True)
+        return Response(serializer.date)
+    
+    def post(self,request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({'message':'new Exercise created successfully!'})
+    
+class UpdatePlanAPIView(generics.GenericAPIView):
+    serializer_class = UpdatePlanSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    lookup_field = 'id'
+    def get_queryset(self):
+        queryset = Plan.objects.filter(course__teacher= self.request.user)
+        return queryset
+    
+    def put(self,request,id):
+        plan = self.get_object()
+        serializer = self.get_serializer(instance=plan,data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({'message':'Exercise plan updated successfully!'})
