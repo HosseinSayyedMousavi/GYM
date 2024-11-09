@@ -7,7 +7,9 @@ from django.db.models import Q
 from .serializers import CourseSerializer , ActionSerializer , DietSerializer , CreateDietSerializer , UpdateDietSerializer
 from .serializers import PlanSerializer , CreatePlanSerializer , UpdatePlanSerializer
 from django.contrib.auth import get_user_model
+from django_filters.rest_framework import DjangoFilterBackend
 
+from .filters import PlanFilter
 User = get_user_model()
 
 class ListPagination(PageNumberPagination):
@@ -49,6 +51,7 @@ class DietAPIView(generics.GenericAPIView):
         serializer.save()
         return Response({'message':'Diet created successfully!'})
     
+    
 class UpdateDietAPIView(generics.GenericAPIView):
     serializer_class = UpdateDietSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -64,20 +67,26 @@ class UpdateDietAPIView(generics.GenericAPIView):
         serializer.save()
         return Response({'message':'Diet updated successfully!'})
     
-class PlanAPIView(generics.GenericAPIView):
-    serializer_class = CreatePlanSerializer
+    
+class PlanAPIView(generics.ListAPIView):
+    serializer_class = PlanSerializer
     permission_classes = [permissions.IsAuthenticated]
-    def get(self,request,):
-        query= Q(course__teacher= request.user.id) | Q(course__student = request.user.id)
+    pagination_class = ListPagination
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = PlanFilter
+    
+    def get_queryset(self):
+        query= Q(course__teacher= self.request.user.id) | Q(course__student = self.request.user.id)
         queryset = Plan.objects.filter(query)
-        serializer = PlanSerializer(queryset, many=True)
-        return Response(serializer.date)
+        return queryset
+    
     
     def post(self,request):
-        serializer = self.get_serializer(data=request.data)
+        serializer = CreatePlanSerializer(data=request.data,context={'request':request})
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response({'message':'new Exercise created successfully!'})
+    
     
 class UpdatePlanAPIView(generics.GenericAPIView):
     serializer_class = UpdatePlanSerializer
