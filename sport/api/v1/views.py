@@ -9,7 +9,7 @@ from .serializers import PlanSerializer , CreatePlanSerializer , UpdatePlanSeria
 from django.contrib.auth import get_user_model
 from django_filters.rest_framework import DjangoFilterBackend
 
-from .filters import PlanFilter
+from .filters import PlanFilter, DietFilter 
 User = get_user_model()
 
 class ListPagination(PageNumberPagination):
@@ -38,6 +38,9 @@ class ActionListAPIView(generics.ListAPIView):
 class DietAPIView(generics.GenericAPIView):
     serializer_class = CreateDietSerializer
     permission_classes = [permissions.IsAuthenticated]
+    pagination_class = ListPagination
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = DietFilter
 
     def get(self,request):
         query = Q(course__teacher= request.user.id) | Q(course__student= request.user.id)
