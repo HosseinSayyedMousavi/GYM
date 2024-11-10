@@ -32,6 +32,8 @@ class ConversationDetailSerializer(serializers.ModelSerializer):
     
     def get_conversation_messages(self, obj):
         request = self.context.get('request')
+        paginator_serializer = ConversationMessagePaginatorSerializer(data = request.query_params)
+        paginator_serializer.is_valid(raise_exception=True)
         page_size = int(request.query_params.get('page_size', 10))  
         page_number = int(request.query_params.get('page', 1))  
         

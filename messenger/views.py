@@ -67,6 +67,7 @@ class ConversationAPIView(generics.ListAPIView):
         conversation.conversationmessage_set.create(**message)
         return Response({"detail": "conversation created successfully!"},status=status.HTTP_201_CREATED)
 
+
 class ConversationDetailAPIView(generics.RetrieveAPIView):
 
     permission_classes =[permissions.IsAuthenticated]
