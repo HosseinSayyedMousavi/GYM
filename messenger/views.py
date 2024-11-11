@@ -7,8 +7,8 @@ from rest_framework.pagination import PageNumberPagination
 from .serializers import   CreateConversationSerializer , ConversationSerializer , ConversationDetailSerializer , AddMessageSerializer
 from rest_framework import status
 from drf_spectacular.utils import extend_schema, OpenApiExample , OpenApiParameter
-from datetime import datetime
-from django.db.models import Q
+from django.db.models import Exists, OuterRef, Q
+
 User = get_user_model()
 
 
@@ -21,7 +21,7 @@ class ListPagination(PageNumberPagination):
             'next': self.get_next_link(),
             'previous': self.get_previous_link(),
             'count': self.page.paginator.count,
-            'new_conversations': Conversation.objects.filter(conversationmessage__viewed=False).exclude(conversationmessage__user=self.request.user.id).distinct().count(),
+            'new_conversations': Conversation.objects.filter(conversationmessage__viewed=False,conversationmessage__user__ne=self.request.user.id).distinct().count(),
             'results': data,
         })
 
@@ -33,7 +33,15 @@ class ConversationAPIView(generics.ListAPIView):
 
     def get_queryset(self):
         query = Q(sender= self.request.user.id) | Q(receiver= self.request.user.id)
-        queryset = Conversation.objects.filter(query).order_by('-id')
+        queryset = Conversation.objects.filter(query).annotate(
+            not_viewed=Exists(ConversationMessage.objects.filter(
+                                                                                                conversation=OuterRef('pk'),
+                                                                                                user__ne=self.request.user.id,
+                                                                                                viewed=False
+                                                                                            )
+                                                                                        ),
+            last_message_id=ConversationMessage.objects.filter(conversation=OuterRef('pk')).order_by('-id').first().id
+                                        ).order_by('not_viewed','-last_message_id')
         return queryset
     
     @extend_schema(
@@ -61,11 +69,12 @@ class ConversationAPIView(generics.ListAPIView):
         request.data["sender"]=request.user.id
         serializer = CreateConversationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        message = {"message":serializer.validated_data.pop("message"),
-                             "user":serializer.validated_data["sender"]}
+        conversation_message_data = {"message":serializer.validated_data.pop("message"),
+                                                                "user":serializer.validated_data["sender"]}
         conversation = serializer.save()
-        conversation.conversationmessage_set.create(**message)
+        conversation.conversationmessage_set.create(**conversation_message_data)
         return Response({"detail": "conversation created successfully!"},status=status.HTTP_201_CREATED)
+
 
 class ConversationDetailAPIView(generics.RetrieveAPIView):
 
@@ -74,8 +83,7 @@ class ConversationDetailAPIView(generics.RetrieveAPIView):
     lookup_field = 'id' 
 
     def get_queryset(self):
-        query = Q(sender= self.request.user.id) | Q(receiver= self.request.user.id)
-        queryset = Conversation.objects.filter(query).order_by('-id')
+        queryset = Conversation.objects.filter(Q(sender= self.request.user.id) | Q(receiver= self.request.user.id))
         return queryset
     
 

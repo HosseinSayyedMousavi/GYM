@@ -1,16 +1,14 @@
 from rest_framework import serializers ,exceptions 
 from .models import Conversation , ConversationMessage
 from django.utils.translation import gettext as _
-from django.core.validators import MaxLengthValidator
 from django.core.paginator import Paginator
-import difflib
+
 
 class CreateConversationSerializer(serializers.ModelSerializer):
-    message = serializers.CharField(required=True,validators=[MaxLengthValidator(1000)])
+    message = serializers.CharField(required=True,max_length=1000)
     class Meta:
         model = Conversation
         fields = ("sender","receiver","title","message")
-
 
 class ConversationSerializer(serializers.ModelSerializer):
     class Meta: 
@@ -32,6 +30,8 @@ class ConversationDetailSerializer(serializers.ModelSerializer):
     
     def get_conversation_messages(self, obj):
         request = self.context.get('request')
+        paginator_serializer = ConversationMessagePaginatorSerializer(data = request.query_params)
+        paginator_serializer.is_valid(raise_exception=True)
         page_size = int(request.query_params.get('page_size', 10))  
         page_number = int(request.query_params.get('page', 1))  
         
