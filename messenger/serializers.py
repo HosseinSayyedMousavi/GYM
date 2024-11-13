@@ -3,6 +3,7 @@ from .models import Conversation , ConversationMessage
 from django.utils.translation import gettext as _
 from django.core.paginator import Paginator
 from sport.models import Course
+from account.api.v1.serializers import UserAPIViewSerializer
 
 class CreateConversationSerializer(serializers.ModelSerializer):
     message = serializers.CharField(required=True,max_length=1000)
@@ -21,6 +22,8 @@ class CreateConversationSerializer(serializers.ModelSerializer):
 
 
 class ConversationSerializer(serializers.ModelSerializer):
+    sender = UserAPIViewSerializer()
+    receiver = UserAPIViewSerializer()
     class Meta: 
         model = Conversation
         fields = '__all__'

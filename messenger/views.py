@@ -7,7 +7,7 @@ from rest_framework.pagination import PageNumberPagination
 from .serializers import   CreateConversationSerializer , ConversationSerializer , ConversationDetailSerializer , AddMessageSerializer
 from rest_framework import status
 from drf_spectacular.utils import extend_schema, OpenApiExample , OpenApiParameter
-from django.db.models import Exists, OuterRef, Q
+from django.db.models import Exists, OuterRef, Q, Subquery
 
 User = get_user_model()
 
@@ -21,7 +21,7 @@ class ListPagination(PageNumberPagination):
             'next': self.get_next_link(),
             'previous': self.get_previous_link(),
             'count': self.page.paginator.count,
-            'new_conversations': Conversation.objects.filter(conversationmessage__viewed=False,conversationmessage__user__ne=self.request.user.id).distinct().count(),
+            'new_conversations': Conversation.objects.filter(conversationmessage__viewed=False).exclude(conversationmessage__user=self.request.user.id).distinct().count(),
             'results': data,
         })
 
@@ -36,12 +36,11 @@ class ConversationAPIView(generics.ListAPIView):
         queryset = Conversation.objects.filter(query).annotate(
             not_viewed=Exists(ConversationMessage.objects.filter(
                                                                                                 conversation=OuterRef('pk'),
-                                                                                                user__ne=self.request.user.id,
                                                                                                 viewed=False
-                                                                                            )
-                                                                                        ),
-            last_message_id=ConversationMessage.objects.filter(conversation=OuterRef('pk')).order_by('-id').first().id
-                                        ).order_by('not_viewed','-last_message_id')
+                                                                                            ).exclude(user=self.request.user.id)),
+                last_message_id=Subquery(ConversationMessage.objects.filter(conversation=OuterRef('pk')).order_by('-id').values('id')[:1])
+                                ).order_by('not_viewed','-last_message_id')
+        print(ConversationSerializer(instance=queryset,many=True).data)
         return queryset
     
     @extend_schema(

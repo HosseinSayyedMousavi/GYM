@@ -28,6 +28,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
 
 class UserAPIViewSerializer(serializers.Serializer):
+    id = serializers.CharField(read_only=True)
     email = serializers.EmailField(required=False)
     first_name = serializers.CharField(max_length=20,required=False)
     last_name = serializers.CharField(max_length=20,required=False)
