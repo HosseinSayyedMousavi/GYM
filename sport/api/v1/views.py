@@ -8,6 +8,7 @@ from .serializers import CourseSerializer , ActionSerializer , DietSerializer , 
 from .serializers import PlanSerializer , CreatePlanSerializer , UpdatePlanSerializer
 from django.contrib.auth import get_user_model
 from django_filters.rest_framework import DjangoFilterBackend
+from drf_spectacular.utils import extend_schema, OpenApiExample , OpenApiParameter , OpenApiRequest
 
 from .filters import PlanFilter, DietFilter 
 User = get_user_model()
@@ -48,6 +49,7 @@ class DietAPIView(generics.GenericAPIView):
         serializer = DietSerializer(queryset,many=True)
         return Response(serializer.data)
 
+
     def post(self,request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -83,6 +85,21 @@ class PlanAPIView(generics.ListAPIView):
         queryset = Plan.objects.filter(query)
         return queryset
     
+    @extend_schema(
+    request=OpenApiRequest({
+        "type": "object",
+        "properties": {
+            "course" : {"type": "integer"},
+            "set_number" :{"type": "integer"},
+            "number_per_set" :{"type": "integer"},
+            "start_date": {"type": "string","format": "date-time", "example": "2024-11-23T12:34:56Z"},
+            "end_date": {"type": "string","format": "date-time", "example": "2024-11-23T12:34:56Z"},
+            "day_of_week" :{"type":"string"},
+            "action" :{"type": "integer"},
+        },
+        },)
+    )
+ 
     
     def post(self,request):
         serializer = CreatePlanSerializer(data=request.data,context={'request':request})

@@ -6,7 +6,7 @@ from rest_framework import generics ,permissions
 from rest_framework.pagination import PageNumberPagination
 from .serializers import   CreateConversationSerializer , ConversationSerializer , ConversationDetailSerializer , AddMessageSerializer
 from rest_framework import status
-from drf_spectacular.utils import extend_schema, OpenApiExample , OpenApiParameter
+from drf_spectacular.utils import extend_schema, OpenApiExample , OpenApiParameter , OpenApiRequest
 from django.db.models import Exists, OuterRef, Q, Subquery
 
 User = get_user_model()
@@ -96,6 +96,16 @@ class ConversationDetailAPIView(generics.RetrieveAPIView):
     def get(self,*args,**kwargs):
         return super().get(*args,**kwargs)
     
+
+    @extend_schema(
+        request=OpenApiRequest({
+            "type": "object",
+            "properties": {
+                "message": {"type": "string", "maxLength": 1000},
+            },
+            "required": ["message"],
+        },)
+    )
     def post(self,request,id):
         request.data["user"]=request.user.id
         request.data["conversation"]=id
